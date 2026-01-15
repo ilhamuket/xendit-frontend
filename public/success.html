@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Payment Success - QRIS</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .container {
+      background: white;
+      border-radius: 16px;
+      padding: 40px;
+      max-width: 500px;
+      width: 100%;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      text-align: center;
+    }
+    .success-icon {
+      width: 100px;
+      height: 100px;
+      margin: 0 auto 30px;
+      background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 50px;
+      animation: scaleIn 0.5s ease-out;
+    }
+    @keyframes scaleIn {
+      0% {
+        transform: scale(0);
+        opacity: 0;
+      }
+      50% {
+        transform: scale(1.1);
+      }
+      100% {
+        transform: scale(1);
+        opacity: 1;
+      }
+    }
+    h1 {
+      color: #11998e;
+      margin-bottom: 10px;
+      font-size: 32px;
+      animation: fadeInUp 0.6s ease-out 0.2s both;
+    }
+    .subtitle {
+      color: #666;
+      margin-bottom: 30px;
+      font-size: 16px;
+      animation: fadeInUp 0.6s ease-out 0.3s both;
+    }
+    @keyframes fadeInUp {
+      0% {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    .payment-info {
+      background: #f7f9fa;
+      border-radius: 12px;
+      padding: 25px;
+      margin-bottom: 30px;
+      animation: fadeInUp 0.6s ease-out 0.4s both;
+    }
+    .info-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 12px 0;
+      border-bottom: 1px solid #e0e0e0;
+    }
+    .info-row:last-child {
+      border-bottom: none;
+    }
+    .info-label {
+      color: #666;
+      font-size: 14px;
+    }
+    .info-value {
+      color: #333;
+      font-weight: 600;
+      font-size: 14px;
+    }
+    .amount {
+      font-size: 36px;
+      font-weight: bold;
+      color: #11998e;
+      margin: 20px 0;
+    }
+    .transaction-id {
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
+      color: #999;
+      word-break: break-all;
+    }
+    .buttons {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      animation: fadeInUp 0.6s ease-out 0.5s both;
+    }
+    button, .button {
+      width: 100%;
+      padding: 14px;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      text-decoration: none;
+      display: inline-block;
+      text-align: center;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+      color: white;
+    }
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(17, 153, 142, 0.4);
+    }
+    .btn-secondary {
+      background: white;
+      color: #11998e;
+      border: 2px solid #11998e;
+    }
+    .btn-secondary:hover {
+      background: #f7f9fa;
+    }
+    .details {
+      margin-top: 30px;
+      padding-top: 30px;
+      border-top: 2px dashed #e0e0e0;
+      animation: fadeInUp 0.6s ease-out 0.6s both;
+    }
+    .details h3 {
+      color: #333;
+      font-size: 18px;
+      margin-bottom: 15px;
+    }
+    .detail-item {
+      display: flex;
+      align-items: center;
+      padding: 10px 0;
+      color: #666;
+      font-size: 14px;
+    }
+    .detail-item svg {
+      margin-right: 10px;
+      color: #11998e;
+    }
+    .confetti {
+      position: fixed;
+      width: 10px;
+      height: 10px;
+      background: #11998e;
+      position: absolute;
+      animation: confetti-fall 3s linear;
+    }
+    @keyframes confetti-fall {
+      to {
+        transform: translateY(100vh) rotate(360deg);
+        opacity: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="success-icon">✓</div>
+    
+    <h1>Pembayaran Berhasil!</h1>
+    <p class="subtitle">Transaksi Anda telah diproses</p>
+    
+    <div class="amount" id="amount">Rp 0</div>
+    
+    <div class="payment-info">
+      <div class="info-row">
+        <span class="info-label">Metode Pembayaran</span>
+        <span class="info-value" id="channel">QRIS</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">Transaction ID</span>
+        <span class="info-value transaction-id" id="transactionId">-</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">Tanggal & Waktu</span>
+        <span class="info-value" id="datetime">-</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">Status</span>
+        <span class="info-value" style="color: #11998e;">✓ PAID</span>
+      </div>
+    </div>
+    
+    <div class="buttons">
+      <a href="/payment-qris.html" class="button btn-primary">Buat Transaksi Baru</a>
+      <button class="button btn-secondary" onclick="window.print()">🖨️ Cetak Struk</button>
+    </div>
+    
+    <div class="details">
+      <h3>Detail Transaksi</h3>
+      <div class="detail-item">
+        <svg width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
+          <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"/>
+        </svg>
+        <span>Transaksi ini adalah simulasi test mode</span>
+      </div>
+      <div class="detail-item">
+        <svg width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
+          <path d="M2.5 1A1.5 1.5 0 0 0 1 2.5v11A1.5 1.5 0 0 0 2.5 15h6.086a1.5 1.5 0 0 0 1.06-.44l4.915-4.914A1.5 1.5 0 0 0 15 8.586V2.5A1.5 1.5 0 0 0 13.5 1h-11zM2 2.5a.5.5 0 0 1 .5-.5h11a.5.5 0 0 1 .5.5V8H9.5A1.5 1.5 0 0 0 8 9.5V14H2.5a.5.5 0 0 1-.5-.5v-11zm7 11.293V9.5a.5.5 0 0 1 .5-.5h4.293L9 13.793z"/>
+        </svg>
+        <span>Struk digital telah dikirim ke email</span>
+      </div>
+      <div class="detail-item">
+        <svg width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
+          <path d="M8 0a8 8 0 1 1 0 16A8 8 0 0 1 8 0zM4.5 7.5a.5.5 0 0 0 0 1h5.793l-2.147 2.146a.5.5 0 0 0 .708.708l3-3a.5.5 0 0 0 0-.708l-3-3a.5.5 0 1 0-.708.708L10.293 7.5H4.5z"/>
+        </svg>
+        <span>Pesanan akan diproses dalam 1x24 jam</span>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Get URL parameters
+    const params = new URLSearchParams(window.location.search);
+    const qrId = params.get('qr_id');
+    const amount = params.get('amount');
+    const channel = params.get('channel');
+
+    // Format and display data
+    if (amount) {
+      document.getElementById('amount').textContent = formatRupiah(parseInt(amount));
+    }
+
+    if (channel) {
+      document.getElementById('channel').textContent = formatChannelName(channel);
+    }
+
+    if (qrId) {
+      document.getElementById('transactionId').textContent = qrId;
+    }
+
+    // Display current datetime
+    const now = new Date();
+    document.getElementById('datetime').textContent = now.toLocaleString('id-ID', {
+      day: '2-digit',
+      month: 'long',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit'
+    });
+
+    // Format functions
+    function formatRupiah(amount) {
+      return new Intl.NumberFormat('id-ID', {
+        style: 'currency',
+        currency: 'IDR',
+        minimumFractionDigits: 0
+      }).format(amount);
+    }
+
+    function formatChannelName(code) {
+      const names = {
+        'ID_DANA': 'DANA',
+        'ID_LINKAJA': 'LinkAja',
+        'ID_OVO': 'OVO',
+        'ID_SHOPEEPAY': 'ShopeePay'
+      };
+      return names[code] || 'QRIS';
+    }
+
+    // Create confetti effect
+    function createConfetti() {
+      const colors = ['#11998e', '#38ef7d', '#667eea', '#764ba2', '#ffc107'];
+      for (let i = 0; i < 50; i++) {
+        setTimeout(() => {
+          const confetti = document.createElement('div');
+          confetti.className = 'confetti';
+          confetti.style.left = Math.random() * 100 + '%';
+          confetti.style.background = colors[Math.floor(Math.random() * colors.length)];
+          confetti.style.animationDelay = Math.random() * 0.5 + 's';
+          document.body.appendChild(confetti);
+          
+          setTimeout(() => confetti.remove(), 3000);
+        }, i * 30);
+      }
+    }
+
+    // Trigger confetti on load
+    window.addEventListener('load', createConfetti);
+
+    // Print style
+    const style = document.createElement('style');
+    style.textContent = `
+      @media print {
+        body {
+          background: white;
+          padding: 20px;
+        }
+        .buttons {
+          display: none;
+        }
+        .container {
+          box-shadow: none;
+          max-width: 100%;
+        }
+      }
+    `;
+    document.head.appendChild(style);
+  </script>
+</body>
+</html>

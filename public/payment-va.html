@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Virtual Account Payment</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .container {
+      background: white;
+      border-radius: 16px;
+      padding: 40px;
+      max-width: 500px;
+      width: 100%;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    }
+    h1 {
+      color: #333;
+      margin-bottom: 10px;
+      font-size: 28px;
+    }
+    .subtitle {
+      color: #666;
+      margin-bottom: 30px;
+      font-size: 14px;
+    }
+    .products {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      margin-bottom: 30px;
+    }
+    .product {
+      border: 2px solid #e0e0e0;
+      border-radius: 12px;
+      padding: 20px;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .product:hover {
+      border-color: #667eea;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+    }
+    .product.selected {
+      border-color: #667eea;
+      background: #f7f8ff;
+    }
+    .product-info h3 {
+      color: #333;
+      margin-bottom: 5px;
+      font-size: 18px;
+    }
+    .product-price {
+      color: #667eea;
+      font-size: 20px;
+      font-weight: bold;
+    }
+    .banks {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      margin-bottom: 30px;
+    }
+    .bank {
+      border: 2px solid #e0e0e0;
+      border-radius: 12px;
+      padding: 15px;
+      cursor: pointer;
+      transition: all 0.3s;
+      text-align: center;
+      font-weight: 600;
+      color: #333;
+    }
+    .bank:hover {
+      border-color: #667eea;
+      transform: translateY(-2px);
+    }
+    .bank.selected {
+      border-color: #667eea;
+      background: #f7f8ff;
+      color: #667eea;
+    }
+    .form-group {
+      margin-bottom: 20px;
+    }
+    label {
+      display: block;
+      margin-bottom: 8px;
+      color: #333;
+      font-weight: 500;
+      font-size: 14px;
+    }
+    input {
+      width: 100%;
+      padding: 12px 16px;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      font-size: 15px;
+      transition: border-color 0.3s;
+    }
+    input:focus {
+      outline: none;
+      border-color: #667eea;
+    }
+    button {
+      width: 100%;
+      padding: 14px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+    }
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+    .error {
+      color: #e74c3c;
+      font-size: 14px;
+      margin-top: 10px;
+      display: none;
+    }
+    .loading {
+      display: none;
+      text-align: center;
+      color: #667eea;
+      margin-top: 10px;
+    }
+    .result {
+      display: none;
+      background: #f7f8ff;
+      border: 2px solid #667eea;
+      border-radius: 12px;
+      padding: 25px;
+      margin-top: 20px;
+    }
+    .result h2 {
+      color: #667eea;
+      margin-bottom: 15px;
+      font-size: 20px;
+    }
+    .va-info {
+      background: white;
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 15px;
+    }
+    .va-number {
+      font-size: 24px;
+      font-weight: bold;
+      color: #333;
+      letter-spacing: 2px;
+      margin: 10px 0;
+      font-family: 'Courier New', monospace;
+    }
+    .copy-btn {
+      background: #667eea;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+      margin-top: 10px;
+      width: auto;
+    }
+    .copy-btn:hover {
+      background: #5568d3;
+      transform: translateY(-2px);
+    }
+    .info-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 0;
+      border-bottom: 1px solid #e0e0e0;
+    }
+    .info-row:last-child {
+      border-bottom: none;
+    }
+    .info-label {
+      color: #666;
+      font-size: 14px;
+    }
+    .info-value {
+      color: #333;
+      font-weight: 600;
+      font-size: 14px;
+    }
+    .back-link {
+      display: inline-block;
+      margin-top: 20px;
+      color: #667eea;
+      text-decoration: none;
+      font-weight: 600;
+    }
+    .back-link:hover {
+      text-decoration: underline;
+    }
+    .test-mode-box {
+      margin-top: 20px;
+      padding: 15px;
+      background: #fff3cd;
+      border: 2px solid #ffc107;
+      border-radius: 8px;
+    }
+    .test-mode-box p {
+      color: #856404;
+      font-size: 13px;
+      margin-bottom: 10px;
+    }
+    .simulate-btn {
+      width: 100%;
+      background: #ffc107;
+      color: #333;
+      font-weight: 600;
+      margin-top: 10px;
+    }
+    .simulate-btn:hover {
+      background: #e0a800;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>💳 Virtual Account</h1>
+    <p class="subtitle">Pilih produk, bank, dan dapatkan nomor VA</p>
+    
+    <div id="formSection">
+      <div class="products" id="products">
+        <div class="product" data-id="10" data-price="100000">
+          <div class="product-info">
+            <h3>👕 Kaos</h3>
+            <p style="color: #666; font-size: 14px;">Company: RICH</p>
+          </div>
+          <div class="product-price">Rp 100.000</div>
+        </div>
+        <div class="product" data-id="11" data-price="250000">
+          <div class="product-info">
+            <h3>🧥 Jaket</h3>
+            <p style="color: #666; font-size: 14px;">Company: CAKRA</p>
+          </div>
+          <div class="product-price">Rp 250.000</div>
+        </div>
+      </div>
+
+      <label style="margin-bottom: 10px; display: block;">Pilih Bank</label>
+      <div class="banks" id="banks">
+        <div class="bank" data-code="BCA">🏦 BCA</div>
+        <div class="bank" data-code="BNI">🏦 BNI</div>
+        <div class="bank" data-code="BRI">🏦 BRI</div>
+        <div class="bank" data-code="MANDIRI">🏦 Mandiri</div>
+        <div class="bank" data-code="PERMATA">🏦 Permata</div>
+      </div>
+
+      <form id="paymentForm">
+        <div class="form-group">
+          <label for="name">Nama Lengkap</label>
+          <input type="text" id="name" name="name" placeholder="John Doe" required>
+        </div>
+
+        <div class="form-group">
+          <label for="email">Email</label>
+          <input type="email" id="email" name="email" placeholder="john@example.com" required>
+        </div>
+
+        <button type="submit" id="submitBtn">Generate Virtual Account</button>
+        <div class="loading" id="loading">⏳ Memproses...</div>
+        <div class="error" id="error"></div>
+      </form>
+
+      <a href="/" class="back-link">← Kembali ke Snap Payment</a>
+    </div>
+
+    <div class="result" id="result">
+      <h2>✅ Virtual Account Berhasil Dibuat!</h2>
+      <div class="va-info">
+        <div class="info-row">
+          <span class="info-label">Bank</span>
+          <span class="info-value" id="resultBank"></span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Nomor VA</span>
+          <div>
+            <div class="va-number" id="resultVA"></div>
+            <button class="copy-btn" onclick="copyVA()">📋 Copy</button>
+          </div>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Jumlah</span>
+          <span class="info-value" id="resultAmount"></span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Nama</span>
+          <span class="info-value" id="resultName"></span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Berlaku Hingga</span>
+          <span class="info-value" id="resultExpiry"></span>
+        </div>
+      </div>
+      <p style="color: #666; font-size: 14px; margin-top: 15px;">
+        💡 Silakan transfer sesuai nominal ke nomor VA di atas sebelum masa berlaku habis.
+      </p>
+
+      <!-- TEST MODE SECTION -->
+      <div class="test-mode-box">
+        <p><strong>🧪 Test Mode:</strong> Simulate payment untuk testing</p>
+        <button class="simulate-btn" onclick="simulatePayment()">
+          🎮 Simulate Payment (Test Only)
+        </button>
+      </div>
+
+      <button onclick="location.reload()" style="margin-top: 20px;">Buat VA Baru</button>
+    </div>
+  </div>
+
+  <script>
+    let selectedProductId = null;
+    let selectedBankCode = null;
+    let currentExternalId = null; // 👈 PENTING: Store external_id untuk simulate
+    let currentAmount = null;
+
+    // Handle product selection
+    document.querySelectorAll('.product').forEach(product => {
+      product.addEventListener('click', function() {
+        document.querySelectorAll('.product').forEach(p => p.classList.remove('selected'));
+        this.classList.add('selected');
+        selectedProductId = this.dataset.id;
+      });
+    });
+
+    // Handle bank selection
+    document.querySelectorAll('.bank').forEach(bank => {
+      bank.addEventListener('click', function() {
+        document.querySelectorAll('.bank').forEach(b => b.classList.remove('selected'));
+        this.classList.add('selected');
+        selectedBankCode = this.dataset.code;
+      });
+    });
+
+    // Handle form submission
+    document.getElementById('paymentForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const errorEl = document.getElementById('error');
+      const loadingEl = document.getElementById('loading');
+      const submitBtn = document.getElementById('submitBtn');
+
+      // Validation
+      if (!selectedProductId) {
+        errorEl.textContent = 'Pilih produk terlebih dahulu!';
+        errorEl.style.display = 'block';
+        return;
+      }
+
+      if (!selectedBankCode) {
+        errorEl.textContent = 'Pilih bank terlebih dahulu!';
+        errorEl.style.display = 'block';
+        return;
+      }
+
+      errorEl.style.display = 'none';
+      loadingEl.style.display = 'block';
+      submitBtn.disabled = true;
+
+      const name = document.getElementById('name').value;
+      const email = document.getElementById('email').value;
+
+      try {
+        const response = await fetch(`http://localhost:3000/transactions/${selectedProductId}/va`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            customerName: name,
+            customerEmail: email,
+            bankCode: selectedBankCode,
+          }),
+        });
+
+        const data = await response.json();
+
+        if (response.ok && data.va_number) {
+          // Store external_id untuk simulation (BUKAN va_id)
+          currentExternalId = data.external_id; // 👈 INI YANG PENTING
+          currentAmount = data.amount;
+
+          console.log('✅ VA Created:', {
+            va_id: data.va_id,
+            external_id: currentExternalId,
+            va_number: data.va_number,
+            amount: currentAmount
+          });
+
+          // Show result
+          document.getElementById('formSection').style.display = 'none';
+          document.getElementById('result').style.display = 'block';
+          
+          document.getElementById('resultBank').textContent = data.bank_code;
+          document.getElementById('resultVA').textContent = data.va_number;
+          document.getElementById('resultAmount').textContent = formatRupiah(data.amount);
+          document.getElementById('resultName').textContent = data.name;
+          document.getElementById('resultExpiry').textContent = formatDate(data.expiration_date);
+        } else {
+          throw new Error(data.message || 'Failed to create VA');
+        }
+      } catch (error) {
+        errorEl.textContent = error.message;
+        errorEl.style.display = 'block';
+        loadingEl.style.display = 'none';
+        submitBtn.disabled = false;
+      }
+    });
+
+    // Simulate payment function
+    async function simulatePayment() {
+      if (!currentExternalId) {
+        alert('❌ External ID tidak ditemukan');
+        return;
+      }
+
+      if (!currentAmount) {
+        alert('❌ Amount tidak ditemukan');
+        return;
+      }
+
+      const btn = event.target;
+      const originalText = btn.textContent;
+      btn.disabled = true;
+      btn.textContent = '⏳ Simulating...';
+
+      try {
+        console.log('🎮 Simulating payment:', {
+          external_id: currentExternalId,
+          amount: currentAmount
+        });
+
+        const response = await fetch(`http://localhost:3000/transactions/simulate-payment/${currentExternalId}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ amount: currentAmount }),
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          alert('✅ Payment simulated successfully!\n\n' +
+                (data.message || 'Processing...') + '\n\n' +
+                'Check your backend logs for webhook notification.\n\n' +
+                'External ID: ' + currentExternalId);
+        } else {
+          alert('❌ Simulation failed:\n' + (data.message || JSON.stringify(data)));
+        }
+      } catch (error) {
+        alert('❌ Error: ' + error.message);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = originalText;
+      }
+    }
+
+    function copyVA() {
+      const vaNumber = document.getElementById('resultVA').textContent;
+      navigator.clipboard.writeText(vaNumber);
+      alert('✅ Nomor VA berhasil dicopy!');
+    }
+
+    function formatRupiah(amount) {
+      return new Intl.NumberFormat('id-ID', {
+        style: 'currency',
+        currency: 'IDR',
+        minimumFractionDigits: 0
+      }).format(amount);
+    }
+
+    function formatDate(dateString) {
+      return new Date(dateString).toLocaleString('id-ID', {
+        day: '2-digit',
+        month: 'long',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    }
+
+    // Auto-select first product and bank
+    document.querySelector('.product').click();
+    document.querySelector('.bank').click();
+  </script>
+</body>
+</html>

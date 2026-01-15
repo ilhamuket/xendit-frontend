@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>QRIS Payment</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .container {
+      background: white;
+      border-radius: 16px;
+      padding: 40px;
+      max-width: 500px;
+      width: 100%;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    }
+    h1 {
+      color: #333;
+      margin-bottom: 10px;
+      font-size: 28px;
+    }
+    .subtitle {
+      color: #666;
+      margin-bottom: 30px;
+      font-size: 14px;
+    }
+    .products {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      margin-bottom: 30px;
+    }
+    .product {
+      border: 2px solid #e0e0e0;
+      border-radius: 12px;
+      padding: 20px;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .product:hover {
+      border-color: #667eea;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+    }
+    .product.selected {
+      border-color: #667eea;
+      background: #f7f8ff;
+    }
+    .product-info h3 {
+      color: #333;
+      margin-bottom: 5px;
+      font-size: 18px;
+    }
+    .product-price {
+      color: #667eea;
+      font-size: 20px;
+      font-weight: bold;
+    }
+    .channels {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      margin-bottom: 30px;
+    }
+    .channel {
+      border: 2px solid #e0e0e0;
+      border-radius: 12px;
+      padding: 15px;
+      cursor: pointer;
+      transition: all 0.3s;
+      text-align: center;
+      font-weight: 600;
+      color: #333;
+    }
+    .channel:hover {
+      border-color: #667eea;
+      transform: translateY(-2px);
+    }
+    .channel.selected {
+      border-color: #667eea;
+      background: #f7f8ff;
+      color: #667eea;
+    }
+    .form-group {
+      margin-bottom: 20px;
+    }
+    label {
+      display: block;
+      margin-bottom: 8px;
+      color: #333;
+      font-weight: 500;
+      font-size: 14px;
+    }
+    input {
+      width: 100%;
+      padding: 12px 16px;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      font-size: 15px;
+      transition: border-color 0.3s;
+    }
+    input:focus {
+      outline: none;
+      border-color: #667eea;
+    }
+    button {
+      width: 100%;
+      padding: 14px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+    }
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+    .error {
+      color: #e74c3c;
+      font-size: 14px;
+      margin-top: 10px;
+      display: none;
+    }
+    .loading {
+      display: none;
+      text-align: center;
+      color: #667eea;
+      margin-top: 10px;
+    }
+    .result {
+      display: none;
+      background: #f7f8ff;
+      border: 2px solid #667eea;
+      border-radius: 12px;
+      padding: 25px;
+      margin-top: 20px;
+    }
+    .result h2 {
+      color: #667eea;
+      margin-bottom: 15px;
+      font-size: 20px;
+    }
+    .qr-container {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .qr-image {
+      max-width: 250px;
+      width: 100%;
+      height: auto;
+      margin: 0 auto;
+      display: block;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      padding: 10px;
+    }
+    .info-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 0;
+      border-bottom: 1px solid #e0e0e0;
+    }
+    .info-row:last-child {
+      border-bottom: none;
+    }
+    .info-label {
+      color: #666;
+      font-size: 14px;
+    }
+    .info-value {
+      color: #333;
+      font-weight: 600;
+      font-size: 14px;
+    }
+    .back-link {
+      display: inline-block;
+      margin-top: 20px;
+      color: #667eea;
+      text-decoration: none;
+      font-weight: 600;
+    }
+    .back-link:hover {
+      text-decoration: underline;
+    }
+    .test-mode-box {
+      margin-top: 20px;
+      padding: 15px;
+      background: #fff3cd;
+      border: 2px solid #ffc107;
+      border-radius: 8px;
+    }
+    .test-mode-box p {
+      color: #856404;
+      font-size: 13px;
+      margin-bottom: 10px;
+    }
+    .simulate-btn {
+      width: 100%;
+      background: #ffc107;
+      color: #333;
+      font-weight: 600;
+      margin-top: 10px;
+    }
+    .simulate-btn:hover {
+      background: #e0a800;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>📱 QRIS Payment</h1>
+    <p class="subtitle">Pilih produk, e-wallet, dan scan QR untuk bayar</p>
+    
+    <div id="formSection">
+      <div class="products" id="products">
+        <div class="product" data-id="10" data-price="100000">
+          <div class="product-info">
+            <h3>👕 Kaos</h3>
+            <p style="color: #666; font-size: 14px;">Company: RICH</p>
+          </div>
+          <div class="product-price">Rp 100.000</div>
+        </div>
+        <div class="product" data-id="11" data-price="250000">
+          <div class="product-info">
+            <h3>🧥 Jaket</h3>
+            <p style="color: #666; font-size: 14px;">Company: CAKRA</p>
+          </div>
+          <div class="product-price">Rp 250.000</div>
+        </div>
+      </div>
+
+      <label style="margin-bottom: 10px; display: block;">Pilih E-Wallet</label>
+      <div class="channels" id="channels">
+        <div class="channel" data-code="ID_DANA">💰 DANA</div>
+      </div>
+
+      <form id="paymentForm">
+        <div class="form-group">
+          <label for="name">Nama Lengkap</label>
+          <input type="text" id="name" name="name" placeholder="John Doe" required>
+        </div>
+
+        <div class="form-group">
+          <label for="email">Email</label>
+          <input type="email" id="email" name="email" placeholder="john@example.com" required>
+        </div>
+
+        <button type="submit" id="submitBtn">Generate QR Code</button>
+        <div class="loading" id="loading">⏳ Memproses...</div>
+        <div class="error" id="error"></div>
+      </form>
+
+      <a href="/" class="back-link">← Kembali ke Snap Payment</a>
+    </div>
+
+    <div class="result" id="result">
+      <h2>✅ QR Code Berhasil Dibuat!</h2>
+      
+      <div class="qr-container">
+        <img id="qrImage" class="qr-image" alt="QR Code">
+        <p style="color: #666; font-size: 12px; margin-top: 10px;">
+          Scan QR code dengan aplikasi e-wallet
+        </p>
+      </div>
+
+      <div style="background: white; padding: 15px; border-radius: 8px;">
+        <div class="info-row">
+          <span class="info-label">E-Wallet</span>
+          <span class="info-value" id="resultChannel"></span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">QR ID</span>
+          <span class="info-value" id="resultQRId" style="font-size: 12px; font-family: monospace;"></span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Jumlah</span>
+          <span class="info-value" id="resultAmount"></span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Status</span>
+          <span class="info-value" id="resultStatus"></span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Berlaku Hingga</span>
+          <span class="info-value" id="resultExpiry"></span>
+        </div>
+      </div>
+
+      <p style="color: #666; font-size: 14px; margin-top: 15px;">
+        💡 Scan QR code dengan aplikasi e-wallet Anda untuk melakukan pembayaran.
+      </p>
+
+      <!-- TEST MODE SECTION -->
+      <div class="test-mode-box">
+        <p><strong>🧪 Test Mode:</strong> Simulate payment untuk testing</p>
+        <button class="simulate-btn" onclick="simulatePayment()">
+          🎮 Simulate Payment (Test Only)
+        </button>
+      </div>
+
+      <button onclick="location.reload()" style="margin-top: 20px;">Buat QR Baru</button>
+    </div>
+  </div>
+
+  <script>
+    let selectedProductId = null;
+    let selectedChannelCode = null;
+    let currentQRId = null;
+    let currentAmount = null;
+
+    // Handle product selection
+    document.querySelectorAll('.product').forEach(product => {
+      product.addEventListener('click', function() {
+        document.querySelectorAll('.product').forEach(p => p.classList.remove('selected'));
+        this.classList.add('selected');
+        selectedProductId = this.dataset.id;
+      });
+    });
+
+    // Handle channel selection
+    document.querySelectorAll('.channel').forEach(channel => {
+      channel.addEventListener('click', function() {
+        document.querySelectorAll('.channel').forEach(c => c.classList.remove('selected'));
+        this.classList.add('selected');
+        selectedChannelCode = this.dataset.code;
+      });
+    });
+
+    // Handle form submission
+    document.getElementById('paymentForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const errorEl = document.getElementById('error');
+      const loadingEl = document.getElementById('loading');
+      const submitBtn = document.getElementById('submitBtn');
+
+      // Validation
+      if (!selectedProductId) {
+        errorEl.textContent = 'Pilih produk terlebih dahulu!';
+        errorEl.style.display = 'block';
+        return;
+      }
+
+      if (!selectedChannelCode) {
+        errorEl.textContent = 'Pilih e-wallet terlebih dahulu!';
+        errorEl.style.display = 'block';
+        return;
+      }
+
+      errorEl.style.display = 'none';
+      loadingEl.style.display = 'block';
+      submitBtn.disabled = true;
+
+      const name = document.getElementById('name').value;
+      const email = document.getElementById('email').value;
+
+      try {
+        const response = await fetch(`http://localhost:3000/transactions/${selectedProductId}/qris`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            customerName: name,
+            customerEmail: email,
+            channelCode: selectedChannelCode,
+          }),
+        });
+
+        const data = await response.json();
+
+        if (response.ok && data.qr_id) {
+          // Store QR ID untuk simulation
+          currentQRId = data.qr_id;
+          currentAmount = data.amount;
+
+          console.log('✅ QRIS Created:', {
+            qr_id: currentQRId,
+            amount: currentAmount,
+            channel: data.channel_code,
+          });
+
+          // Generate QR Code image from qr_string
+          generateQRImage(data.qr_string);
+
+          // Show result
+          document.getElementById('formSection').style.display = 'none';
+          document.getElementById('result').style.display = 'block';
+          
+          document.getElementById('resultChannel').textContent = formatChannelName(data.channel_code);
+          document.getElementById('resultQRId').textContent = data.qr_id;
+          document.getElementById('resultAmount').textContent = formatRupiah(data.amount);
+          document.getElementById('resultStatus').textContent = data.status;
+          document.getElementById('resultExpiry').textContent = formatDate(data.expires_at);
+        } else {
+          throw new Error(data.message || 'Failed to create QR Code');
+        }
+      } catch (error) {
+        errorEl.textContent = error.message;
+        errorEl.style.display = 'block';
+        loadingEl.style.display = 'none';
+        submitBtn.disabled = false;
+      }
+    });
+
+    // Generate QR Code image using API
+    function generateQRImage(qrString) {
+      // Using quickchart.io API to generate QR code
+      const qrUrl = `https://quickchart.io/qr?text=${encodeURIComponent(qrString)}&size=250`;
+      document.getElementById('qrImage').src = qrUrl;
+    }
+
+    // Simulate payment function
+    async function simulatePayment() {
+      if (!currentQRId) {
+        alert('❌ QR ID tidak ditemukan');
+        return;
+      }
+
+      if (!currentAmount) {
+        alert('❌ Amount tidak ditemukan');
+        return;
+      }
+
+      const btn = event.target;
+      const originalText = btn.textContent;
+      btn.disabled = true;
+      btn.textContent = '⏳ Simulating...';
+
+      try {
+        console.log('🎮 Simulating payment:', {
+          qr_id: currentQRId,
+          amount: currentAmount
+        });
+
+        const response = await fetch(`http://localhost:3000/transactions/simulate-qris-payment/${currentQRId}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ amount: currentAmount }),
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          // Redirect to success page
+          window.location.href = `/success.html?qr_id=${currentQRId}&amount=${currentAmount}&channel=${selectedChannelCode}`;
+        } else {
+          alert('❌ Simulation failed:\n' + (data.message || JSON.stringify(data)));
+          btn.disabled = false;
+          btn.textContent = originalText;
+        }
+      } catch (error) {
+        alert('❌ Error: ' + error.message);
+        btn.disabled = false;
+        btn.textContent = originalText;
+      }
+    }
+
+    function formatChannelName(code) {
+      const names = {
+        'ID_DANA': 'DANA',
+        'ID_LINKAJA': 'LinkAja',
+        'ID_OVO': 'OVO',
+        'ID_SHOPEEPAY': 'ShopeePay'
+      };
+      return names[code] || code;
+    }
+
+    function formatRupiah(amount) {
+      return new Intl.NumberFormat('id-ID', {
+        style: 'currency',
+        currency: 'IDR',
+        minimumFractionDigits: 0
+      }).format(amount);
+    }
+
+    function formatDate(dateString) {
+      return new Date(dateString).toLocaleString('id-ID', {
+        day: '2-digit',
+        month: 'long',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    }
+
+    // Auto-select first product and channel
+    document.querySelector('.product').click();
+    document.querySelector('.channel').click();
+  </script>
+</body>
+</html>
