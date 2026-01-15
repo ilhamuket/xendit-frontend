@@ -235,8 +235,42 @@
   </style>
 </head>
 <body>
-  <!-- Load configuration first -->
-  <script src="/config.js"></script>
+  <!-- Inline Configuration - No external file needed -->
+  <script>
+    // Environment Configuration
+    (function() {
+      const ENV = {
+        development: {
+          API_BASE_URL: 'http://localhost:3000',
+        },
+        staging: {
+          API_BASE_URL: 'https://xen-platform.vercel.app',
+        },
+        production: {
+          API_BASE_URL: 'https://xen-platform.vercel.app', // Update with your production backend URL
+        },
+      };
+
+      // Auto-detect environment based on hostname
+      const hostname = window.location.hostname;
+      let currentEnv = 'development';
+
+      if (hostname === 'localhost' || hostname === '127.0.0.1') {
+        currentEnv = 'development';
+      } else if (hostname.includes('staging') || hostname.includes('vercel.app')) {
+        // Vercel deployments are often staging/preview
+        currentEnv = 'staging';
+      } else {
+        currentEnv = 'production';
+      }
+
+      // Set global API_BASE_URL
+      window.API_BASE_URL = ENV[currentEnv].API_BASE_URL;
+
+      console.log('🔧 Environment:', currentEnv);
+      console.log('🌐 API Base URL:', window.API_BASE_URL);
+    })();
+  </script>
   
   <div class="container">
     <h1>📱 QRIS Payment</h1>
