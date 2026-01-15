@@ -26,13 +26,5 @@
       "source": "/(.*)",
       "destination": "/$1"
     }
-  ],
-  "env": {
-    "API_BASE_URL": "https://xen-platform.vercel.app"
-  },
-  "build": {
-    "env": {
-      "API_BASE_URL": "@api-base-url"
-    }
-  }
+  ]
 }
