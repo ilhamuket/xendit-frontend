@@ -12,7 +12,7 @@ app.use(express.static('public'));
 
 // Route untuk serve HTML
 app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'payment.html'));
+  res.sendFile(path.join(__dirname, 'public', 'payment-qris.html'));
 });
 
 app.listen(PORT, () => {
