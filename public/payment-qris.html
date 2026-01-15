@@ -235,6 +235,9 @@
   </style>
 </head>
 <body>
+  <!-- Load configuration first -->
+  <script src="/config.js"></script>
+  
   <div class="container">
     <h1>📱 QRIS Payment</h1>
     <p class="subtitle">Pilih produk, e-wallet, dan scan QR untuk bayar</p>
@@ -260,6 +263,9 @@
       <label style="margin-bottom: 10px; display: block;">Pilih E-Wallet</label>
       <div class="channels" id="channels">
         <div class="channel" data-code="ID_DANA">💰 DANA</div>
+        <div class="channel" data-code="ID_LINKAJA">🔗 LinkAja</div>
+        <div class="channel" data-code="ID_OVO">🟣 OVO</div>
+        <div class="channel" data-code="ID_SHOPEEPAY">🛍️ ShopeePay</div>
       </div>
 
       <form id="paymentForm">
@@ -331,6 +337,9 @@
   </div>
 
   <script>
+    // Configuration - Backend URL dari environment atau default localhost
+    const API_BASE_URL = window.API_BASE_URL || 'http://localhost:3000';
+    
     let selectedProductId = null;
     let selectedChannelCode = null;
     let currentQRId = null;
@@ -383,7 +392,7 @@
       const email = document.getElementById('email').value;
 
       try {
-        const response = await fetch(`http://localhost:3000/transactions/${selectedProductId}/qris`, {
+        const response = await fetch(`${API_BASE_URL}/transactions/${selectedProductId}/qris`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -461,7 +470,7 @@
           amount: currentAmount
         });
 
-        const response = await fetch(`http://localhost:3000/transactions/simulate-qris-payment/${currentQRId}`, {
+        const response = await fetch(`${API_BASE_URL}/transactions/simulate-qris-payment/${currentQRId}`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
